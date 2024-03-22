@@ -1,0 +1,5 @@
+name: BedwarsPlugin
+version: 1.0
+main: path.to.your.plugin.MainBedwarsPluginClass
+api-version: 1.17
+description: A simple Bedwars plugin for Minecraft.
