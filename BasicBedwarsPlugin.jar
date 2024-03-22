@@ -1,0 +1,108 @@
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class BedwarsPlugin extends JavaPlugin implements Listener {
+
+    private List<Team> teams = new ArrayList<>();
+
+    @Override
+    public void onEnable() {
+        getServer().getPluginManager().registerEvents(this, this);
+        // Initialize teams and map setup
+        setupTeams();
+        setupMap();
+    }
+
+    private void setupTeams() {
+        // Create teams
+        teams.add(new Team("Red", ChatColor.RED));
+        teams.add(new Team("Blue", ChatColor.BLUE));
+        // Add more teams as needed
+
+        // Assign spawn locations to teams
+        teams.get(0).setSpawnLocation(new Location(Bukkit.getWorld("world"), 0, 64, 0));
+        teams.get(1).setSpawnLocation(new Location(Bukkit.getWorld("world"), 10, 64, 10));
+        // Set spawn locations for more teams
+    }
+
+    private void setupMap() {
+        // Place beds and generators on islands
+        // This is where you would create the map layout
+        // For simplicity, we'll skip this in the example
+    }
+
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent event) {
+        // Prevent bed from being broken
+        if (event.getBlock().getType().toString().contains("BED")) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        // Find player's team
+        Team playerTeam = null;
+        for (Team team : teams) {
+            if (team.hasPlayer(player)) {
+                playerTeam = team;
+                break;
+            }
+        }
+
+        if (playerTeam != null) {
+            // Respawn player at team's spawn location
+            event.setRespawnLocation(playerTeam.getSpawnLocation());
+            // Apply regeneration effect
+            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 60, 1));
+        }
+    }
+}
+
+class Team {
+    private String name;
+    private ChatColor color;
+    private List<Player> players = new ArrayList<>();
+    private Location spawnLocation;
+
+    public Team(String name, ChatColor color) {
+        this.name = name;
+        this.color = color;
+    }
+
+    public void setSpawnLocation(Location spawnLocation) {
+        this.spawnLocation = spawnLocation;
+    }
+
+    public Location getSpawnLocation() {
+        return spawnLocation;
+    }
+
+    public void addPlayer(Player player) {
+        players.add(player);
+        // Implement team specific logic when player joins
+    }
+
+    public void removePlayer(Player player) {
+        players.remove(player);
+        // Implement team specific logic when player leaves
+    }
+
+    public boolean hasPlayer(Player player) {
+        return players.contains(player);
+    }
+}
